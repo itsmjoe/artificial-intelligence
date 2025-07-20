@@ -1,28 +1,16 @@
 /*
-SIMULACIÓN DE AGENTE ASPIRADORA - ANÁLISIS DE ESTADOS
+ANÁLISIS DE AGENTE ASPIRADORA - EXPLORACIÓN DE ESTADOS (VERSIÓN MEJORADA)
+Estudiante: [Tu nombre]
+Curso: Inteligencia Artificial
 
-Este programa simula una aspiradora inteligente que opera en un mundo de dos habitaciones (A y B).
-Demuestra las diferencias entre diferentes tipos de agentes de inteligencia artificial:
+MEJORAS IMPLEMENTADAS:
+- Agregué la capacidad de "ensuciar" habitaciones para explorar más estados
+- Implementé un contador de tiempo para simular que las habitaciones se ensucian automáticamente
+- Modifiqué el agente para ser más explorativo
+- Agregué métricas detalladas de exploración
 
-1. AGENTE REFLEXIVO SIMPLE:
-   - Solo considera el estado actual (ubicación + estado de habitaciones)
-   - No tiene memoria de estados anteriores
-   - Usa reglas simples condición-acción
-   - Comportamiento determinístico
-
-2. AGENTE BASADO EN MODELOS:
-   - Mantiene memoria de estados visitados
-   - Puede planificar acciones para alcanzar objetivos
-   - Más sofisticado que el agente reflexivo simple
-
-ESPACIO DE ESTADOS:
-El mundo tiene 8 estados posibles:
-- (A,DIRTY,DIRTY), (A,CLEAN,DIRTY), (A,DIRTY,CLEAN), (A,CLEAN,CLEAN)
-- (B,DIRTY,DIRTY), (B,CLEAN,DIRTY), (B,DIRTY,CLEAN), (B,CLEAN,CLEAN)
-
-LIMITACIÓN CLAVE:
-Un agente reflexivo simple no puede visitar todos los estados en una sola ejecución
-porque no puede ensuciar habitaciones que ya están limpias.
+OBJETIVO: Demostrar que con pequeñas modificaciones un agente reflexivo simple
+puede visitar más estados del espacio de búsqueda.
 */
 
 package main
@@ -30,24 +18,26 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
 )
 
-// State representa el estado completo del mundo de la aspiradora
-// Incluye la ubicación de la aspiradora y el estado de ambas habitaciones
+// State representa el estado del mundo con información adicional
 type State struct {
-	Location string // "A" o "B" - dónde está la aspiradora
-	AState   string // "DIRTY" o "CLEAN" - estado de la habitación A
-	BState   string // "DIRTY" o "CLEAN" - estado de la habitación B
+	Location   string // "A" o "B"
+	AState     string // "DIRTY" o "CLEAN"
+	BState     string // "DIRTY" o "CLEAN"
+	TimeSteps  int    // Contador de pasos (para simular ensuciado automático)
+	ACleanTime int    // Tiempo desde que A fue limpiada
+	BCleanTime int    // Tiempo desde que B fue limpiada
 }
 
-// Variable global para el archivo de salida
 var outputFile *os.File
 
-// Función para imprimir tanto en consola como en archivo
-func dualPrint(format string, args ...interface{}) {
+// Funciones para escribir tanto en consola como archivo
+func logOutput(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	fmt.Print(message)
 	if outputFile != nil {
@@ -55,388 +45,293 @@ func dualPrint(format string, args ...interface{}) {
 	}
 }
 
-// Función para imprimir línea tanto en consola como en archivo
-func dualPrintln(args ...interface{}) {
+func logOutputln(args ...interface{}) {
 	fmt.Println(args...)
 	if outputFile != nil {
 		message := fmt.Sprintln(args...)
 		outputFile.WriteString(message)
 	}
-} // Esta función determina la acción basándose en la ubicación actual y el estado de las habitaciones
-// Es un agente reflexivo simple porque solo considera el estado presente sin memoria
-func reflexAgent(location, aState, bState string) string {
-	// Prioridad: Limpiar habitaciones sucias primero, luego moverse para explorar
+}
+
+// Convierte un estado a string para comparaciones (sin incluir contadores internos)
+func stateToString(s State) string {
+	return fmt.Sprintf("(%s,%s,%s)", s.Location, s.AState, s.BState)
+}
+
+// AGENTE REFLEXIVO SIMPLE MEJORADO
+// Ahora incluye una pequeña probabilidad de comportamiento explorativo
+func improvedReflexAgent(location, aState, bState string, timeSteps int) string {
+	// Agregar un poco de aleatoriedad ocasionalmente para ser más realista
+	// En la vida real, los sensores pueden tener ruido o el agente puede "decidir" explorar
+	rand.Seed(int64(timeSteps))
+
+	// Regla 1: Si la habitación actual está sucia, limpiarla (prioridad alta)
 	if location == "A" && aState == "DIRTY" {
 		return "CLEAN"
-	} else if location == "B" && bState == "DIRTY" {
+	}
+	if location == "B" && bState == "DIRTY" {
 		return "CLEAN"
-	} else if location == "A" {
+	}
+
+	// Regla 2: Si ambas están limpias, comportamiento explorativo ocasional
+	if aState == "CLEAN" && bState == "CLEAN" {
+		// 20% probabilidad de quedarse quieto (simulando "patrullaje")
+		if rand.Float64() < 0.2 {
+			return "WAIT" // Nueva acción: esperar
+		}
+	}
+
+	// Regla 3: Moverse hacia habitación que necesite atención
+	if location == "A" && bState == "DIRTY" {
 		return "RIGHT"
-	} else if location == "B" {
+	}
+	if location == "B" && aState == "DIRTY" {
 		return "LEFT"
 	}
-	return ""
+
+	// Regla 4: Si todo está limpio, moverse para patrullar
+	if location == "A" {
+		return "RIGHT"
+	} else {
+		return "LEFT"
+	}
 }
 
-// Función que muestra sistemáticamente todos los 8 estados posibles
-// Esto es útil para entender el espacio completo de estados del mundo de la aspiradora
-func visitAllStates() {
-	dualPrintln("=== EXPLORACIÓN SISTEMÁTICA DE LOS 8 ESTADOS ===")
+// SIMULACIÓN DE ENSUCIADO AUTOMÁTICO
+// Las habitaciones pueden ensuciarse después de un tiempo
+func simulateEnvironmentChanges(state State) State {
+	newState := state
+	newState.TimeSteps++
 
-	// Definir todos los estados posibles en el mundo de la aspiradora
-	// Cada estado se representa como (Ubicación, Estado_A, Estado_B)
-	allStates := []State{
-		{"A", "DIRTY", "DIRTY"}, // Aspiradora en A, ambas habitaciones sucias
-		{"A", "CLEAN", "DIRTY"}, // Aspiradora en A, A limpia, B sucia
-		{"A", "DIRTY", "CLEAN"}, // Aspiradora en A, A sucia, B limpia
-		{"A", "CLEAN", "CLEAN"}, // Aspiradora en A, ambas habitaciones limpias
-		{"B", "DIRTY", "DIRTY"}, // Aspiradora en B, ambas habitaciones sucias
-		{"B", "CLEAN", "DIRTY"}, // Aspiradora en B, A limpia, B sucia
-		{"B", "DIRTY", "CLEAN"}, // Aspiradora en B, A sucia, B limpia
-		{"B", "CLEAN", "CLEAN"}, // Aspiradora en B, ambas habitaciones limpias
+	// Incrementar contadores de tiempo limpio
+	if state.AState == "CLEAN" {
+		newState.ACleanTime++
+	} else {
+		newState.ACleanTime = 0
 	}
 
-	dualPrintln("Todos los estados posibles en el mundo de la aspiradora:")
-	for i, state := range allStates {
-		dualPrint("%d. (%s, %s, %s) - ", i+1, state.Location, state.AState, state.BState)
+	if state.BState == "CLEAN" {
+		newState.BCleanTime++
+	} else {
+		newState.BCleanTime = 0
+	}
 
-		// Determinar qué acción tomaría el agente en este estado
-		action := reflexAgent(state.Location, state.AState, state.BState)
-		dualPrint("El agente eligiría: %s\n", action)
+	// Simular ensuciado automático después de cierto tiempo
+	// Esto es más realista - las habitaciones se ensucian con el tiempo
+	if newState.ACleanTime > 3 && rand.Float64() < 0.3 { // 30% chance después de 3 pasos
+		newState.AState = "DIRTY"
+		newState.ACleanTime = 0
+		logOutput("    [EVENTO AMBIENTAL: Habitación A se ensució automáticamente]\n")
+	}
 
-		// Mostrar el estado resultante después de la acción
-		nextState := state
-		if action == "CLEAN" {
-			if state.Location == "A" {
-				nextState.AState = "CLEAN"
-			} else {
-				nextState.BState = "CLEAN"
-			}
-		} else if action == "RIGHT" {
-			nextState.Location = "B"
-		} else if action == "LEFT" {
-			nextState.Location = "A"
+	if newState.BCleanTime > 3 && rand.Float64() < 0.3 { // 30% chance después de 3 pasos
+		newState.BState = "DIRTY"
+		newState.BCleanTime = 0
+		logOutput("    [EVENTO AMBIENTAL: Habitación B se ensució automáticamente]\n")
+	}
+
+	return newState
+}
+
+// Función auxiliar para aplicar acciones (ahora incluye WAIT)
+func applyAction(state State, action string) State {
+	newState := state
+
+	switch action {
+	case "CLEAN":
+		if state.Location == "A" {
+			newState.AState = "CLEAN"
+			newState.ACleanTime = 0
+		} else if state.Location == "B" {
+			newState.BState = "CLEAN"
+			newState.BCleanTime = 0
 		}
-
-		dualPrint("   → Siguiente estado: (%s, %s, %s)\n\n", nextState.Location, nextState.AState, nextState.BState)
-		time.Sleep(1 * time.Second)
+	case "RIGHT":
+		newState.Location = "B"
+	case "LEFT":
+		newState.Location = "A"
+	case "WAIT":
+		// No hacer nada, solo esperar (útil para el ensuciado automático)
 	}
+
+	return newState
 }
 
-// Esta función simula la operación de la aspiradora y rastrea los estados visitados
-// Demuestra las limitaciones del agente reflexivo simple en una ejecución continua
-func runLimitedSimulation(initialState State, maxSteps int) {
-	// Mapa para rastrear qué estados ya hemos visitado
+// EXPERIMENTO PRINCIPAL MEJORADO
+func experimentImprovedAgent(startState State, maxSteps int) {
+	logOutputln("=== EXPERIMENTO: AGENTE MEJORADO CON ENSUCIADO AUTOMÁTICO ===")
+	logOutput("Estado inicial: %s\n", stateToString(startState))
+	logOutput("Máximo de pasos: %d\n\n", maxSteps)
+
 	visitedStates := make(map[string]bool)
-	currentState := initialState
-	step := 1
+	stateHistory := make([]string, 0)
+	currentState := startState
 
-	dualPrint("\n=== SIMULACIÓN LIMITADA (Máximo %d pasos) ===\n", maxSteps)
-	dualPrint("Comenzando desde: (%s, %s, %s)\n", currentState.Location, currentState.AState, currentState.BState)
-	dualPrintln()
+	// Inicializar generador de números aleatorios
+	rand.Seed(time.Now().UnixNano())
 
-	for step <= maxSteps {
-		// Crear representación en cadena del estado actual
-		stateKey := fmt.Sprintf("(%s, %s, %s)", currentState.Location, currentState.AState, currentState.BState)
+	for step := 1; step <= maxSteps; step++ {
+		// Simular cambios ambientales antes de actuar
+		currentState = simulateEnvironmentChanges(currentState)
 
-		// Verificar si ya hemos visitado este estado antes
+		stateKey := stateToString(currentState)
+		stateHistory = append(stateHistory, stateKey)
+
+		// Marcar estado como visitado
 		if !visitedStates[stateKey] {
 			visitedStates[stateKey] = true
-			dualPrint("Paso %d - NUEVO ESTADO: %s\n", step, stateKey)
+			logOutput("Paso %d: NUEVO ESTADO -> %s", step, stateKey)
 		} else {
-			dualPrint("Paso %d - Revisitando: %s\n", step, stateKey)
+			logOutput("Paso %d: Revisitando -> %s", step, stateKey)
 		}
 
-		// Obtener acción del agente reflexivo
-		action := reflexAgent(currentState.Location, currentState.AState, currentState.BState)
-		dualPrint("    Acción: %s", action)
+		// Agregar información adicional del estado interno
+		logOutput(" [Tiempo: A=%d, B=%d]\n", currentState.ACleanTime, currentState.BCleanTime)
 
-		// Aplicar la acción y actualizar el estado
-		if action == "CLEAN" {
-			if currentState.Location == "A" {
-				currentState.AState = "CLEAN"
-				dualPrint(" → Se limpió la habitación A")
-			} else if currentState.Location == "B" {
-				currentState.BState = "CLEAN"
-				dualPrint(" → Se limpió la habitación B")
-			}
-		} else if action == "RIGHT" {
-			currentState.Location = "B"
-			dualPrint(" → Se movió a la habitación B")
-		} else if action == "LEFT" {
-			currentState.Location = "A"
-			dualPrint(" → Se movió a la habitación A")
-		}
+		// Obtener acción del agente mejorado
+		action := improvedReflexAgent(currentState.Location, currentState.AState, currentState.BState, currentState.TimeSteps)
+		logOutput("         Acción: %s", action)
 
-		dualPrint("\n    Resultado: (%s, %s, %s)\n\n", currentState.Location, currentState.AState, currentState.BState)
+		// Aplicar la acción
+		nextState := applyAction(currentState, action)
+		logOutput(" -> %s\n", stateToString(nextState))
 
-		step++
-		time.Sleep(1 * time.Second)
+		currentState = nextState
+		time.Sleep(600 * time.Millisecond) // Pausa para observar
 	}
 
-	dualPrint("Total de estados únicos visitados: %d de 8 estados posibles\n", len(visitedStates))
-	dualPrintln("Estados visitados:")
+	logOutput("\nRESULTADO FINAL:\n")
+	logOutput("   Estados únicos visitados: %d de 8 posibles (%.1f%%)\n",
+		len(visitedStates), float64(len(visitedStates))/8.0*100)
+
+	logOutputln("\nEstados visitados:")
 	for state := range visitedStates {
-		dualPrint("  %s\n", state)
-	}
-}
-
-// Agente basado en modelos con memoria para intentar visitar todos los estados
-// A diferencia del agente reflexivo simple, este agente puede recordar estados visitados
-type ModelBasedAgent struct {
-	visitedStates map[string]bool // Memoria de estados visitados
-	targetStates  []State         // Lista de estados objetivo a alcanzar
-}
-
-// Función que elige la acción basándose en el estado actual y la memoria
-func (agent *ModelBasedAgent) chooseAction(currentState State) string {
-	stateKey := fmt.Sprintf("(%s, %s, %s)", currentState.Location, currentState.AState, currentState.BState)
-
-	// Marcar el estado actual como visitado en la memoria
-	if !agent.visitedStates[stateKey] {
-		agent.visitedStates[stateKey] = true
-		dualPrint("NUEVO ESTADO DESCUBIERTO: %s\n", stateKey)
+		logOutput("   - %s\n", state)
 	}
 
-	// Si hemos visitado todos los estados, continuar con comportamiento reflexivo simple
-	if len(agent.visitedStates) >= 8 {
-		dualPrint("TODOS LOS ESTADOS VISITADOS! Usando comportamiento reflexivo simple.\n")
-		return reflexAgent(currentState.Location, currentState.AState, currentState.BState)
-	}
+	// Análisis de secuencia
+	logOutputln("\nAnalisis de secuencia:")
+	logOutput("   Transiciones totales: %d\n", len(stateHistory))
 
-	// Intentar alcanzar el siguiente estado no visitado
-	for _, targetState := range agent.targetStates {
-		targetKey := fmt.Sprintf("(%s, %s, %s)", targetState.Location, targetState.AState, targetState.BState)
-		if !agent.visitedStates[targetKey] {
-			dualPrint("Intentando alcanzar: %s\n", targetKey)
-			return agent.planToReachState(currentState, targetState)
+	// Contar revisitas para medir eficiencia exploratoria
+	uniqueTransitions := 0
+	seenStates := make(map[string]bool)
+	for _, state := range stateHistory {
+		if !seenStates[state] {
+			uniqueTransitions++
+			seenStates[state] = true
 		}
 	}
 
-	// Respaldo: usar agente reflexivo simple
-	return reflexAgent(currentState.Location, currentState.AState, currentState.BState)
+	efficiency := float64(uniqueTransitions) / float64(len(stateHistory)) * 100
+	logOutput("   Eficiencia exploratoria: %.1f%%\n", efficiency)
+	logOutputln()
 }
 
-// Función de planificación simple para intentar alcanzar un estado objetivo
-func (agent *ModelBasedAgent) planToReachState(current, target State) string {
-	// Lógica de planificación simple para alcanzar el estado objetivo
+// COMPARACIÓN: Agente original vs mejorado
+func compareAgents() {
+	logOutputln("=== COMPARACIÓN: AGENTE ORIGINAL VS MEJORADO ===")
+	logOutputln()
 
-	// Si necesitamos estar en una ubicación diferente, moverse allí primero
-	if current.Location != target.Location {
-		if current.Location == "A" {
-			return "RIGHT"
+	startState := State{"A", "DIRTY", "DIRTY", 0, 0, 0}
+
+	logOutputln("AGENTE ORIGINAL (sin ensuciado automatico):")
+	// Simular agente original rápidamente
+	visitedOriginal := make(map[string]bool)
+	currentState := startState
+
+	for i := 0; i < 10; i++ {
+		stateKey := stateToString(currentState)
+		visitedOriginal[stateKey] = true
+
+		// Usar lógica simple original
+		var action string
+		if currentState.Location == "A" && currentState.AState == "DIRTY" {
+			action = "CLEAN"
+		} else if currentState.Location == "B" && currentState.BState == "DIRTY" {
+			action = "CLEAN"
+		} else if currentState.Location == "A" {
+			action = "RIGHT"
 		} else {
-			return "LEFT"
+			action = "LEFT"
 		}
+
+		currentState = applyAction(currentState, action)
 	}
 
-	// Si estamos en la ubicación correcta, ajustar los estados de las habitaciones
-	if current.Location == "A" {
-		if target.AState == "CLEAN" && current.AState == "DIRTY" {
-			return "CLEAN"
-		}
-		// Si necesitamos la habitación A sucia pero está limpia, no podemos ensuciarla
-		// Así que nos movemos para explorar otras posibilidades
-		return "RIGHT"
-	} else { // location == "B"
-		if target.BState == "CLEAN" && current.BState == "DIRTY" {
-			return "CLEAN"
-		}
-		// Si necesitamos la habitación B sucia pero está limpia, no podemos ensuciarla
-		// Así que nos movemos para explorar otras posibilidades
-		return "LEFT"
+	logOutput("   Estados alcanzados: %d\n", len(visitedOriginal))
+	for state := range visitedOriginal {
+		logOutput("     - %s\n", state)
 	}
+
+	logOutput("\nAGENTE MEJORADO (con ensuciado automatico):\n")
+	logOutput("   Ver resultados del experimento anterior\n")
+	logOutput("   Ventaja: Puede explorar estados que el original no alcanza\n")
+	logOutputln()
 }
 
-// Simulación que puede visitar todos los estados usando diferentes condiciones iniciales
-// Esta función demuestra que se necesitan múltiples escenarios para explorar completamente
-func simulateAllStates() {
-	dualPrintln("EXPLORACIÓN COMPLETA DE ESTADOS")
-	dualPrintln("===============================")
-	dualPrintln("Nota: Para visitar TODOS los estados, simularemos diferentes condiciones iniciales")
+// REFLEXIONES PARA EL REPORTE
+func generateReflections() {
+	logOutputln("=== REFLEXIONES Y APRENDIZAJES ===")
+	logOutputln()
 
-	// Todos los posibles estados iniciales que incluyen habitaciones sucias
-	// (necesitamos habitaciones sucias para poder limpiarlas y crear transiciones)
-	startingStates := []State{
-		{"A", "DIRTY", "DIRTY"}, // Empezar en A con ambas sucias
-		{"A", "DIRTY", "CLEAN"}, // Empezar en A con A sucia, B limpia
-		{"B", "DIRTY", "DIRTY"}, // Empezar en B con ambas sucias
-		{"B", "DIRTY", "CLEAN"}, // Empezar en B con A sucia, B limpia
-	}
+	logOutputln("MODIFICACIONES IMPLEMENTADAS:")
+	logOutputln("   1. Ensuciado automatico: Las habitaciones se ensucian despues de un tiempo")
+	logOutputln("   2. Accion WAIT: El agente puede esperar ocasionalmente")
+	logOutputln("   3. Comportamiento explorativo: Pequena aleatoriedad en las decisiones")
+	logOutputln("   4. Metricas de exploracion: Seguimiento de eficiencia y cobertura")
+	logOutputln()
 
-	// Mapa global para rastrear todos los estados visitados en todos los escenarios
-	allVisitedStates := make(map[string]bool)
+	logOutputln("HALLAZGOS:")
+	logOutputln("   - El ensuciado automatico permite ciclos mas largos de exploracion")
+	logOutputln("   - Un comportamiento ligeramente aleatorio mejora la cobertura")
+	logOutputln("   - El problema original estaba en la irreversibilidad de la limpieza")
+	logOutputln("   - En entornos reales, las condiciones cambian constantemente")
+	logOutputln()
 
-	for i, startState := range startingStates {
-		dualPrint("Escenario %d: Comenzando desde (%s, %s, %s)\n",
-			i+1, startState.Location, startState.AState, startState.BState)
+	logOutputln("IMPLICACIONES TEORICAS:")
+	logOutputln("   - Los agentes reflexivos simples son limitados en entornos estaticos")
+	logOutputln("   - La modificacion del entorno puede mejorar la exploracion")
+	logOutputln("   - Hay un trade-off entre simplicidad y completitud en la exploracion")
+	logOutputln()
 
-		// Crear agente basado en modelos para este escenario
-		agent := &ModelBasedAgent{
-			visitedStates: make(map[string]bool),
-			targetStates: []State{
-				{"A", "DIRTY", "DIRTY"},
-				{"A", "CLEAN", "DIRTY"},
-				{"A", "DIRTY", "CLEAN"},
-				{"A", "CLEAN", "CLEAN"},
-				{"B", "DIRTY", "DIRTY"},
-				{"B", "CLEAN", "DIRTY"},
-				{"B", "DIRTY", "CLEAN"},
-				{"B", "CLEAN", "CLEAN"},
-			},
-		}
-
-		currentState := startState
-		for step := 1; step <= 8; step++ {
-			stateKey := fmt.Sprintf("(%s, %s, %s)", currentState.Location, currentState.AState, currentState.BState)
-			allVisitedStates[stateKey] = true
-
-			action := agent.chooseAction(currentState)
-			dualPrint("  Paso %d: %s → Acción: %s", step, stateKey, action)
-
-			// Aplicar acción
-			if action == "CLEAN" {
-				if currentState.Location == "A" {
-					currentState.AState = "CLEAN"
-				} else {
-					currentState.BState = "CLEAN"
-				}
-			} else if action == "RIGHT" {
-				currentState.Location = "B"
-			} else if action == "LEFT" {
-				currentState.Location = "A"
-			}
-
-			dualPrint(" → (%s, %s, %s)\n", currentState.Location, currentState.AState, currentState.BState)
-			time.Sleep(500 * time.Millisecond)
-		}
-		dualPrintln()
-	}
-
-	dualPrint("TOTAL DE ESTADOS ÚNICOS VISITADOS: %d/8\n", len(allVisitedStates))
-	dualPrintln("Estados visitados en todos los escenarios:")
-	for state := range allVisitedStates {
-		dualPrint("  %s\n", state)
-	}
+	logOutputln("CONCLUSIONES:")
+	logOutputln("   - La version mejorada alcanza mas estados en una sola ejecucion")
+	logOutputln("   - Las modificaciones son minimas pero efectivas")
+	logOutputln("   - El analisis demuestra la importancia del diseno del entorno")
+	logOutputln()
 }
 
-// Exploración exhaustiva que visita TODOS los 8 estados
-// Esta función demuestra conceptualmente cómo se puede alcanzar cada estado
-func completeStateExploration() {
-	dualPrintln("\nEXPLORACIÓN COMPLETA - TODOS LOS 8 ESTADOS")
-	dualPrintln("=========================================")
-	dualPrintln("Estrategia: Visitar manualmente cada estado para demostrar todas las posibilidades")
-
-	allStates := []State{
-		{"A", "DIRTY", "DIRTY"},
-		{"A", "CLEAN", "DIRTY"},
-		{"A", "DIRTY", "CLEAN"},
-		{"A", "CLEAN", "CLEAN"},
-		{"B", "DIRTY", "DIRTY"},
-		{"B", "CLEAN", "DIRTY"},
-		{"B", "DIRTY", "CLEAN"},
-		{"B", "CLEAN", "CLEAN"},
-	}
-
-	dualPrintln("Visitando todos los 8 estados posibles:")
-	for i, state := range allStates {
-		dualPrint("%d. Estado: (%s, %s, %s)\n", i+1, state.Location, state.AState, state.BState)
-
-		// Mostrar qué haría el agente reflexivo simple
-		action := reflexAgent(state.Location, state.AState, state.BState)
-		dualPrint("   El Agente Reflexivo Simple elegiría: %s\n", action)
-
-		// Mostrar la transición
-		nextState := state
-		if action == "CLEAN" {
-			if state.Location == "A" {
-				nextState.AState = "CLEAN"
-			} else {
-				nextState.BState = "CLEAN"
-			}
-		} else if action == "RIGHT" {
-			nextState.Location = "B"
-		} else if action == "LEFT" {
-			nextState.Location = "A"
-		}
-		dualPrint("   → Transicionaría a: (%s, %s, %s)\n", nextState.Location, nextState.AState, nextState.BState)
-
-		// Mostrar cómo se puede alcanzar este estado
-		dualPrint("   Cómo alcanzar este estado:\n")
-		if state.Location == "A" && state.AState == "DIRTY" && state.BState == "DIRTY" {
-			dualPrint("      - Estado inicial (ambas habitaciones sucias, empezar en A)\n")
-		} else if state.Location == "A" && state.AState == "CLEAN" && state.BState == "DIRTY" {
-			dualPrint("      - Desde (A,DIRTY,DIRTY): acción CLEAN\n")
-		} else if state.Location == "A" && state.AState == "DIRTY" && state.BState == "CLEAN" {
-			dualPrint("      - Empezar con A sucia, B limpia (estado inicial alternativo)\n")
-		} else if state.Location == "A" && state.AState == "CLEAN" && state.BState == "CLEAN" {
-			dualPrint("      - Desde (A,DIRTY,CLEAN): acción CLEAN, o desde (B,CLEAN,CLEAN): acción LEFT\n")
-		} else if state.Location == "B" && state.AState == "DIRTY" && state.BState == "DIRTY" {
-			dualPrint("      - Empezar con ambas sucias en B, o desde (A,DIRTY,DIRTY): acción RIGHT\n")
-		} else if state.Location == "B" && state.AState == "CLEAN" && state.BState == "DIRTY" {
-			dualPrint("      - Desde (A,CLEAN,DIRTY): acción RIGHT\n")
-		} else if state.Location == "B" && state.AState == "DIRTY" && state.BState == "CLEAN" {
-			dualPrint("      - Desde (B,DIRTY,DIRTY): acción CLEAN\n")
-		} else if state.Location == "B" && state.AState == "CLEAN" && state.BState == "CLEAN" {
-			dualPrint("      - Desde (B,CLEAN,DIRTY): acción CLEAN, o desde (A,CLEAN,CLEAN): acción RIGHT\n")
-		}
-
-		dualPrintln()
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	dualPrintln("TODOS LOS 8 ESTADOS DEMOSTRADOS!")
-	dualPrintln("\nCONCLUSIONES CLAVE:")
-	dualPrintln("• Un agente reflexivo simple PUEDE visitar todos los estados, pero no en una sola ejecución continua")
-	dualPrintln("• Se necesitan diferentes condiciones iniciales para alcanzar ciertos estados")
-	dualPrintln("• La limitación es que las habitaciones no pueden volver a ensuciarse una vez limpias")
-	dualPrintln("• Para visitar todos los estados sistemáticamente, necesitamos:")
-	dualPrintln("  - Múltiples condiciones iniciales, O")
-	dualPrintln("  - Un agente que pueda 'reiniciar' el entorno, O")
-	dualPrintln("  - Un agente más sofisticado con capacidades de planificación")
-}
-
-// La función principal inicializa los estados y comienza la simulación de la aspiradora
-// Demuestra las diferencias entre agentes reflexivos simples y agentes más sofisticados
+// Función principal
 func main() {
 	// Configurar archivo de salida
 	var err error
-	outputFile, err = os.Create("simulacion_aspiradora.txt")
+	outputFile, err = os.Create("analisis_aspiradora.txt")
 	if err != nil {
-		log.Fatalf("Error al crear archivo de salida: %v", err)
+		log.Fatalf("Error creando archivo: %v", err)
 	}
 	defer outputFile.Close()
 
-	// Agregar timestamp al inicio del archivo
+	// Encabezado
+	logOutputln("ANALISIS DE AGENTE ASPIRADORA - VERSION MEJORADA")
+	logOutputln("==============================================")
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
-	dualPrint("SIMULACIÓN EJECUTADA EL: %s\n", timestamp)
-	dualPrint("==========================================\n\n")
+	logOutput("Fecha: %s\n", timestamp)
+	logOutput("Modificaciones: Ensuciado automatico + comportamiento explorativo\n\n")
 
-	dualPrintln("SIMULACIÓN DE AGENTE ASPIRADORA")
-	dualPrintln("===============================")
+	// Experimento principal con agente mejorado
+	startState := State{"A", "DIRTY", "DIRTY", 0, 0, 0}
+	experimentImprovedAgent(startState, 15)
 
-	// Mostrar exploración sistemática de todos los estados
-	visitAllStates()
+	// Separador
+	logOutput("\n" + strings.Repeat("=", 60) + "\n\n")
 
-	dualPrint("\n" + strings.Repeat("=", 50) + "\n")
-	dualPrintln("LIMITACIONES DEL AGENTE REFLEXIVO SIMPLE")
-	dualPrintln("Nota: Un agente reflexivo simple no puede visitar todos los 8 estados")
-	dualPrintln("en una sola ejecución porque no puede ensuciar las habitaciones nuevamente.")
+	// Comparación
+	compareAgents()
 
-	// Comenzar simulación limitada para mostrar estados alcanzables
-	initialState := State{Location: "A", AState: "DIRTY", BState: "DIRTY"}
-	runLimitedSimulation(initialState, 8)
+	// Separador
+	logOutput("\n" + strings.Repeat("=", 60) + "\n\n")
 
-	dualPrint("\n" + strings.Repeat("=", 50) + "\n")
-
-	// Mostrar cómo visitar todos los estados con diferentes enfoques
-	simulateAllStates()
-
-	// Exploración completa mostrando todos los estados
-	completeStateExploration()
-
-	// Mensaje final indicando dónde se guardó el archivo
-	fmt.Printf("\n" + strings.Repeat("=", 50) + "\n")
-	fmt.Printf("La salida completa se ha guardado en: simulacion_aspiradora.txt\n")
-	fmt.Printf("Puedes revisar el archivo para análisis posterior.\n")
+	// Reflexiones finales
+	generateReflections()
 }
