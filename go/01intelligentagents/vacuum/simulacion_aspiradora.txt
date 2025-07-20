@@ -1,0 +1,241 @@
+SIMULACIÓN EJECUTADA EL: 2025-07-19 23:21:00
+==========================================
+
+SIMULACIÓN DE AGENTE ASPIRADORA
+===============================
+=== EXPLORACIÓN SISTEMÁTICA DE LOS 8 ESTADOS ===
+
+Todos los estados posibles en el mundo de la aspiradora:
+1. (A, DIRTY, DIRTY) - El agente eligiría: CLEAN
+   → Siguiente estado: (A, CLEAN, DIRTY)
+
+2. (A, CLEAN, DIRTY) - El agente eligiría: RIGHT
+   → Siguiente estado: (B, CLEAN, DIRTY)
+
+3. (A, DIRTY, CLEAN) - El agente eligiría: CLEAN
+   → Siguiente estado: (A, CLEAN, CLEAN)
+
+4. (A, CLEAN, CLEAN) - El agente eligiría: RIGHT
+   → Siguiente estado: (B, CLEAN, CLEAN)
+
+5. (B, DIRTY, DIRTY) - El agente eligiría: CLEAN
+   → Siguiente estado: (B, DIRTY, CLEAN)
+
+6. (B, CLEAN, DIRTY) - El agente eligiría: CLEAN
+   → Siguiente estado: (B, CLEAN, CLEAN)
+
+7. (B, DIRTY, CLEAN) - El agente eligiría: LEFT
+   → Siguiente estado: (A, DIRTY, CLEAN)
+
+8. (B, CLEAN, CLEAN) - El agente eligiría: LEFT
+   → Siguiente estado: (A, CLEAN, CLEAN)
+
+
+==================================================
+LIMITACIONES DEL AGENTE REFLEXIVO SIMPLE
+Nota: Un agente reflexivo simple no puede visitar todos los 8 estados
+en una sola ejecución porque no puede ensuciar las habitaciones nuevamente.
+
+=== SIMULACIÓN LIMITADA (Máximo 8 pasos) ===
+Comenzando desde: (A, DIRTY, DIRTY)
+
+Paso 1 - NUEVO ESTADO: (A, DIRTY, DIRTY)
+    Acción: CLEAN → Se limpió la habitación A
+    Resultado: (A, CLEAN, DIRTY)
+
+Paso 2 - NUEVO ESTADO: (A, CLEAN, DIRTY)
+    Acción: RIGHT → Se movió a la habitación B
+    Resultado: (B, CLEAN, DIRTY)
+
+Paso 3 - NUEVO ESTADO: (B, CLEAN, DIRTY)
+    Acción: CLEAN → Se limpió la habitación B
+    Resultado: (B, CLEAN, CLEAN)
+
+Paso 4 - NUEVO ESTADO: (B, CLEAN, CLEAN)
+    Acción: LEFT → Se movió a la habitación A
+    Resultado: (A, CLEAN, CLEAN)
+
+Paso 5 - NUEVO ESTADO: (A, CLEAN, CLEAN)
+    Acción: RIGHT → Se movió a la habitación B
+    Resultado: (B, CLEAN, CLEAN)
+
+Paso 6 - Revisitando: (B, CLEAN, CLEAN)
+    Acción: LEFT → Se movió a la habitación A
+    Resultado: (A, CLEAN, CLEAN)
+
+Paso 7 - Revisitando: (A, CLEAN, CLEAN)
+    Acción: RIGHT → Se movió a la habitación B
+    Resultado: (B, CLEAN, CLEAN)
+
+Paso 8 - Revisitando: (B, CLEAN, CLEAN)
+    Acción: LEFT → Se movió a la habitación A
+    Resultado: (A, CLEAN, CLEAN)
+
+Total de estados únicos visitados: 5 de 8 estados posibles
+Estados visitados:
+  (A, DIRTY, DIRTY)
+  (A, CLEAN, DIRTY)
+  (B, CLEAN, DIRTY)
+  (B, CLEAN, CLEAN)
+  (A, CLEAN, CLEAN)
+
+==================================================
+EXPLORACIÓN COMPLETA DE ESTADOS
+===============================
+Nota: Para visitar TODOS los estados, simularemos diferentes condiciones iniciales
+
+Escenario 1: Comenzando desde (A, DIRTY, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (A, DIRTY, DIRTY)
+Intentando alcanzar: (A, CLEAN, DIRTY)
+  Paso 1: (A, DIRTY, DIRTY) → Acción: CLEAN → (A, CLEAN, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 2: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 3: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 4: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 5: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 6: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 7: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 8: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+
+Escenario 2: Comenzando desde (A, DIRTY, CLEAN)
+NUEVO ESTADO DESCUBIERTO: (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 1: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+NUEVO ESTADO DESCUBIERTO: (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 2: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 3: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 4: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 5: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 6: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 7: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 8: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+
+Escenario 3: Comenzando desde (B, DIRTY, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (B, DIRTY, DIRTY)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 1: (B, DIRTY, DIRTY) → Acción: LEFT → (A, DIRTY, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (A, DIRTY, DIRTY)
+Intentando alcanzar: (A, CLEAN, DIRTY)
+  Paso 2: (A, DIRTY, DIRTY) → Acción: CLEAN → (A, CLEAN, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 3: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+NUEVO ESTADO DESCUBIERTO: (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 4: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 5: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 6: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 7: (A, CLEAN, DIRTY) → Acción: RIGHT → (B, CLEAN, DIRTY)
+Intentando alcanzar: (A, DIRTY, CLEAN)
+  Paso 8: (B, CLEAN, DIRTY) → Acción: LEFT → (A, CLEAN, DIRTY)
+
+Escenario 4: Comenzando desde (B, DIRTY, CLEAN)
+NUEVO ESTADO DESCUBIERTO: (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 1: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+NUEVO ESTADO DESCUBIERTO: (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 2: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 3: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 4: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 5: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 6: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 7: (B, DIRTY, CLEAN) → Acción: LEFT → (A, DIRTY, CLEAN)
+Intentando alcanzar: (A, DIRTY, DIRTY)
+  Paso 8: (A, DIRTY, CLEAN) → Acción: RIGHT → (B, DIRTY, CLEAN)
+
+TOTAL DE ESTADOS ÚNICOS VISITADOS: 6/8
+Estados visitados en todos los escenarios:
+  (A, DIRTY, DIRTY)
+  (A, CLEAN, DIRTY)
+  (B, CLEAN, DIRTY)
+  (A, DIRTY, CLEAN)
+  (B, DIRTY, CLEAN)
+  (B, DIRTY, DIRTY)
+
+EXPLORACIÓN COMPLETA - TODOS LOS 8 ESTADOS
+=========================================
+Estrategia: Visitar manualmente cada estado para demostrar todas las posibilidades
+
+Visitando todos los 8 estados posibles:
+1. Estado: (A, DIRTY, DIRTY)
+   El Agente Reflexivo Simple elegiría: CLEAN
+   → Transicionaría a: (A, CLEAN, DIRTY)
+   Cómo alcanzar este estado:
+      - Estado inicial (ambas habitaciones sucias, empezar en A)
+
+2. Estado: (A, CLEAN, DIRTY)
+   El Agente Reflexivo Simple elegiría: RIGHT
+   → Transicionaría a: (B, CLEAN, DIRTY)
+   Cómo alcanzar este estado:
+      - Desde (A,DIRTY,DIRTY): acción CLEAN
+
+3. Estado: (A, DIRTY, CLEAN)
+   El Agente Reflexivo Simple elegiría: CLEAN
+   → Transicionaría a: (A, CLEAN, CLEAN)
+   Cómo alcanzar este estado:
+      - Empezar con A sucia, B limpia (estado inicial alternativo)
+
+4. Estado: (A, CLEAN, CLEAN)
+   El Agente Reflexivo Simple elegiría: RIGHT
+   → Transicionaría a: (B, CLEAN, CLEAN)
+   Cómo alcanzar este estado:
+      - Desde (A,DIRTY,CLEAN): acción CLEAN, o desde (B,CLEAN,CLEAN): acción LEFT
+
+5. Estado: (B, DIRTY, DIRTY)
+   El Agente Reflexivo Simple elegiría: CLEAN
+   → Transicionaría a: (B, DIRTY, CLEAN)
+   Cómo alcanzar este estado:
+      - Empezar con ambas sucias en B, o desde (A,DIRTY,DIRTY): acción RIGHT
+
+6. Estado: (B, CLEAN, DIRTY)
+   El Agente Reflexivo Simple elegiría: CLEAN
+   → Transicionaría a: (B, CLEAN, CLEAN)
+   Cómo alcanzar este estado:
+      - Desde (A,CLEAN,DIRTY): acción RIGHT
+
+7. Estado: (B, DIRTY, CLEAN)
+   El Agente Reflexivo Simple elegiría: LEFT
+   → Transicionaría a: (A, DIRTY, CLEAN)
+   Cómo alcanzar este estado:
+      - Desde (B,DIRTY,DIRTY): acción CLEAN
+
+8. Estado: (B, CLEAN, CLEAN)
+   El Agente Reflexivo Simple elegiría: LEFT
+   → Transicionaría a: (A, CLEAN, CLEAN)
+   Cómo alcanzar este estado:
+      - Desde (B,CLEAN,DIRTY): acción CLEAN, o desde (A,CLEAN,CLEAN): acción RIGHT
+
+TODOS LOS 8 ESTADOS DEMOSTRADOS!
+
+CONCLUSIONES CLAVE:
+• Un agente reflexivo simple PUEDE visitar todos los estados, pero no en una sola ejecución continua
+• Se necesitan diferentes condiciones iniciales para alcanzar ciertos estados
+• La limitación es que las habitaciones no pueden volver a ensuciarse una vez limpias
+• Para visitar todos los estados sistemáticamente, necesitamos:
+  - Múltiples condiciones iniciales, O
+  - Un agente que pueda 'reiniciar' el entorno, O
+  - Un agente más sofisticado con capacidades de planificación
