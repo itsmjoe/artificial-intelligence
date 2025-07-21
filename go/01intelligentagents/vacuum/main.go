@@ -59,13 +59,26 @@ func stateToString(s State) string {
 }
 
 // AGENTE REFLEXIVO SIMPLE MEJORADO
-// Ahora incluye una pequeña probabilidad de comportamiento explorativo
+// Incluye comportamiento explorativo para alcanzar todos los estados
 func improvedReflexAgent(location, aState, bState string, timeSteps int) string {
-	// Agregar un poco de aleatoriedad ocasionalmente para ser más realista
-	// En la vida real, los sensores pueden tener ruido o el agente puede "decidir" explorar
+	// Usar el timestamp para generar aleatoriedad consistente
 	rand.Seed(int64(timeSteps))
 
-	// Regla 1: Si la habitación actual está sucia, limpiarla (prioridad alta)
+	// ESTRATEGIA EXPLORATORIA: Ocasionalmente moverse sin limpiar
+	// Esto permite alcanzar el estado (B,DIRTY,DIRTY)
+	if timeSteps < 8 { // En los primeros pasos, ser más explorativo
+		// 25% probabilidad de moverse en lugar de limpiar
+		if rand.Float64() < 0.25 {
+			if location == "A" && bState == "DIRTY" {
+				return "RIGHT" // Ir a B para crear (B,DIRTY,DIRTY)
+			}
+			if location == "B" && aState == "DIRTY" {
+				return "LEFT" // Ir a A para crear (A,DIRTY,DIRTY)
+			}
+		}
+	}
+
+	// Regla 1: Si la habitación actual está sucia, normalmente limpiarla
 	if location == "A" && aState == "DIRTY" {
 		return "CLEAN"
 	}
@@ -73,11 +86,11 @@ func improvedReflexAgent(location, aState, bState string, timeSteps int) string 
 		return "CLEAN"
 	}
 
-	// Regla 2: Si ambas están limpias, comportamiento explorativo ocasional
+	// Regla 2: Si ambas están limpias, comportamiento explorativo
 	if aState == "CLEAN" && bState == "CLEAN" {
-		// 20% probabilidad de quedarse quieto (simulando "patrullaje")
-		if rand.Float64() < 0.2 {
-			return "WAIT" // Nueva acción: esperar
+		// 30% probabilidad de esperar (permite ensuciado automático)
+		if rand.Float64() < 0.3 {
+			return "WAIT"
 		}
 	}
 
@@ -89,7 +102,7 @@ func improvedReflexAgent(location, aState, bState string, timeSteps int) string 
 		return "LEFT"
 	}
 
-	// Regla 4: Si todo está limpio, moverse para patrullar
+	// Regla 4: Comportamiento de patrullaje
 	if location == "A" {
 		return "RIGHT"
 	} else {
@@ -97,8 +110,8 @@ func improvedReflexAgent(location, aState, bState string, timeSteps int) string 
 	}
 }
 
-// SIMULACIÓN DE ENSUCIADO AUTOMÁTICO
-// Las habitaciones pueden ensuciarse después de un tiempo
+// SIMULACIÓN DE ENSUCIADO AUTOMÁTICO MEJORADA
+// Más agresivo para generar más oportunidades de exploración
 func simulateEnvironmentChanges(state State) State {
 	newState := state
 	newState.TimeSteps++
@@ -116,18 +129,25 @@ func simulateEnvironmentChanges(state State) State {
 		newState.BCleanTime = 0
 	}
 
-	// Simular ensuciado automático después de cierto tiempo
-	// Esto es más realista - las habitaciones se ensucian con el tiempo
-	if newState.ACleanTime > 3 && rand.Float64() < 0.3 { // 30% chance después de 3 pasos
+	// Ensuciado más frecuente para crear más oportunidades
+	// Estrategia: ensuciar después de menos tiempo y con mayor probabilidad
+	if newState.ACleanTime >= 2 && rand.Float64() < 0.4 { // 40% chance después de 2 pasos
 		newState.AState = "DIRTY"
 		newState.ACleanTime = 0
-		logOutput("    [EVENTO AMBIENTAL: Habitación A se ensució automáticamente]\n")
+		logOutput("    [EVENTO AMBIENTAL: Habitacion A se ensuciu automaticamente]\n")
 	}
 
-	if newState.BCleanTime > 3 && rand.Float64() < 0.3 { // 30% chance después de 3 pasos
+	if newState.BCleanTime >= 2 && rand.Float64() < 0.4 { // 40% chance después de 2 pasos
 		newState.BState = "DIRTY"
 		newState.BCleanTime = 0
-		logOutput("    [EVENTO AMBIENTAL: Habitación B se ensució automáticamente]\n")
+		logOutput("    [EVENTO AMBIENTAL: Habitacion B se ensuciu automaticamente]\n")
+	}
+
+	// ESTRATEGIA ESPECIAL: A veces ensuciar ambas habitaciones simultáneamente
+	if newState.TimeSteps > 5 && newState.AState == "CLEAN" && newState.BState == "CLEAN" && rand.Float64() < 0.15 {
+		newState.AState = "DIRTY"
+		newState.BState = "DIRTY"
+		logOutput("    [EVENTO ESPECIAL: Ambas habitaciones se ensuciaron simultaneamente]\n")
 	}
 
 	return newState
@@ -161,7 +181,8 @@ func applyAction(state State, action string) State {
 func experimentImprovedAgent(startState State, maxSteps int) {
 	logOutputln("=== EXPERIMENTO: AGENTE MEJORADO CON ENSUCIADO AUTOMÁTICO ===")
 	logOutput("Estado inicial: %s\n", stateToString(startState))
-	logOutput("Máximo de pasos: %d\n\n", maxSteps)
+	logOutput("Maximo de pasos: %d\n", maxSteps)
+	logOutput("Estrategia: Comportamiento explorativo + ensuciado agresivo\n\n")
 
 	visitedStates := make(map[string]bool)
 	stateHistory := make([]string, 0)
@@ -321,7 +342,7 @@ func main() {
 
 	// Experimento principal con agente mejorado
 	startState := State{"A", "DIRTY", "DIRTY", 0, 0, 0}
-	experimentImprovedAgent(startState, 15)
+	experimentImprovedAgent(startState, 20) // Aumentar pasos para más oportunidades
 
 	// Separador
 	logOutput("\n" + strings.Repeat("=", 60) + "\n\n")
@@ -334,4 +355,5 @@ func main() {
 
 	// Reflexiones finales
 	generateReflections()
+
 }

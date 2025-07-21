@@ -1,0 +1,120 @@
+ANALISIS DE AGENTE ASPIRADORA - VERSION MEJORADA
+==============================================
+Fecha: 2025-07-19 23:52:00
+Modificaciones: Ensuciado automatico + comportamiento explorativo
+
+=== EXPERIMENTO: AGENTE MEJORADO CON ENSUCIADO AUTOMÁTICO ===
+Estado inicial: (A,DIRTY,DIRTY)
+Maximo de pasos: 20
+Estrategia: Comportamiento explorativo + ensuciado agresivo
+
+Paso 1: NUEVO ESTADO -> (A,DIRTY,DIRTY) [Tiempo: A=0, B=0]
+         Acción: CLEAN -> (A,CLEAN,DIRTY)
+Paso 2: NUEVO ESTADO -> (A,CLEAN,DIRTY) [Tiempo: A=1, B=0]
+         Acción: RIGHT -> (B,CLEAN,DIRTY)
+    [EVENTO AMBIENTAL: Habitacion A se ensuciu automaticamente]
+Paso 3: NUEVO ESTADO -> (B,DIRTY,DIRTY) [Tiempo: A=0, B=0]
+         Acción: CLEAN -> (B,DIRTY,CLEAN)
+Paso 4: NUEVO ESTADO -> (B,DIRTY,CLEAN) [Tiempo: A=0, B=1]
+         Acción: LEFT -> (A,DIRTY,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion B se ensuciu automaticamente]
+Paso 5: Revisitando -> (A,DIRTY,DIRTY) [Tiempo: A=0, B=0]
+         Acción: CLEAN -> (A,CLEAN,DIRTY)
+Paso 6: Revisitando -> (A,CLEAN,DIRTY) [Tiempo: A=1, B=0]
+         Acción: RIGHT -> (B,CLEAN,DIRTY)
+Paso 7: NUEVO ESTADO -> (B,CLEAN,DIRTY) [Tiempo: A=2, B=0]
+         Acción: CLEAN -> (B,CLEAN,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion A se ensuciu automaticamente]
+Paso 8: Revisitando -> (B,DIRTY,CLEAN) [Tiempo: A=0, B=1]
+         Acción: LEFT -> (A,DIRTY,CLEAN)
+Paso 9: NUEVO ESTADO -> (A,DIRTY,CLEAN) [Tiempo: A=0, B=2]
+         Acción: CLEAN -> (A,CLEAN,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion B se ensuciu automaticamente]
+Paso 10: Revisitando -> (A,CLEAN,DIRTY) [Tiempo: A=1, B=0]
+         Acción: RIGHT -> (B,CLEAN,DIRTY)
+Paso 11: Revisitando -> (B,CLEAN,DIRTY) [Tiempo: A=2, B=0]
+         Acción: CLEAN -> (B,CLEAN,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion A se ensuciu automaticamente]
+Paso 12: Revisitando -> (B,DIRTY,CLEAN) [Tiempo: A=0, B=1]
+         Acción: LEFT -> (A,DIRTY,CLEAN)
+Paso 13: Revisitando -> (A,DIRTY,CLEAN) [Tiempo: A=0, B=2]
+         Acción: CLEAN -> (A,CLEAN,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion B se ensuciu automaticamente]
+Paso 14: Revisitando -> (A,CLEAN,DIRTY) [Tiempo: A=1, B=0]
+         Acción: RIGHT -> (B,CLEAN,DIRTY)
+Paso 15: Revisitando -> (B,CLEAN,DIRTY) [Tiempo: A=2, B=0]
+         Acción: CLEAN -> (B,CLEAN,CLEAN)
+Paso 16: NUEVO ESTADO -> (B,CLEAN,CLEAN) [Tiempo: A=3, B=1]
+         Acción: LEFT -> (A,CLEAN,CLEAN)
+Paso 17: NUEVO ESTADO -> (A,CLEAN,CLEAN) [Tiempo: A=4, B=2]
+         Acción: RIGHT -> (B,CLEAN,CLEAN)
+    [EVENTO AMBIENTAL: Habitacion A se ensuciu automaticamente]
+    [EVENTO AMBIENTAL: Habitacion B se ensuciu automaticamente]
+Paso 18: Revisitando -> (B,DIRTY,DIRTY) [Tiempo: A=0, B=0]
+         Acción: CLEAN -> (B,DIRTY,CLEAN)
+Paso 19: Revisitando -> (B,DIRTY,CLEAN) [Tiempo: A=0, B=1]
+         Acción: LEFT -> (A,DIRTY,CLEAN)
+Paso 20: Revisitando -> (A,DIRTY,CLEAN) [Tiempo: A=0, B=2]
+         Acción: CLEAN -> (A,CLEAN,CLEAN)
+
+RESULTADO FINAL:
+   Estados únicos visitados: 8 de 8 posibles (100.0%)
+
+Estados visitados:
+   - (A,DIRTY,DIRTY)
+   - (A,CLEAN,DIRTY)
+   - (B,DIRTY,DIRTY)
+   - (B,DIRTY,CLEAN)
+   - (B,CLEAN,DIRTY)
+   - (A,DIRTY,CLEAN)
+   - (B,CLEAN,CLEAN)
+   - (A,CLEAN,CLEAN)
+
+Analisis de secuencia:
+   Transiciones totales: 20
+   Eficiencia exploratoria: 40.0%
+
+
+============================================================
+
+=== COMPARACIÓN: AGENTE ORIGINAL VS MEJORADO ===
+
+AGENTE ORIGINAL (sin ensuciado automatico):
+   Estados alcanzados: 5
+     - (B,CLEAN,DIRTY)
+     - (B,CLEAN,CLEAN)
+     - (A,CLEAN,CLEAN)
+     - (A,DIRTY,DIRTY)
+     - (A,CLEAN,DIRTY)
+
+AGENTE MEJORADO (con ensuciado automatico):
+   Ver resultados del experimento anterior
+   Ventaja: Puede explorar estados que el original no alcanza
+
+
+============================================================
+
+=== REFLEXIONES Y APRENDIZAJES ===
+
+MODIFICACIONES IMPLEMENTADAS:
+   1. Ensuciado automatico: Las habitaciones se ensucian despues de un tiempo
+   2. Accion WAIT: El agente puede esperar ocasionalmente
+   3. Comportamiento explorativo: Pequena aleatoriedad en las decisiones
+   4. Metricas de exploracion: Seguimiento de eficiencia y cobertura
+
+HALLAZGOS:
+   - El ensuciado automatico permite ciclos mas largos de exploracion
+   - Un comportamiento ligeramente aleatorio mejora la cobertura
+   - El problema original estaba en la irreversibilidad de la limpieza
+   - En entornos reales, las condiciones cambian constantemente
+
+IMPLICACIONES TEORICAS:
+   - Los agentes reflexivos simples son limitados en entornos estaticos
+   - La modificacion del entorno puede mejorar la exploracion
+   - Hay un trade-off entre simplicidad y completitud en la exploracion
+
+CONCLUSIONES:
+   - La version mejorada alcanza mas estados en una sola ejecucion
+   - Las modificaciones son minimas pero efectivas
+   - El analisis demuestra la importancia del diseno del entorno
+
