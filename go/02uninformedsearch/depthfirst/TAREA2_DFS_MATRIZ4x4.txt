@@ -1,0 +1,285 @@
+TAREA 2 - BÚSQUEDA EN PROFUNDIDAD PARA MATRIZ 4x4
+=======================================================
+
+CÓDIGO FUENTE (main.go):
+========================
+
+package main
+
+import (
+	"fmt"
+)
+
+// returns the successors of a given node in a 4x4 matrix graph.
+// Matrix representation:
+//  1  2  3  4
+//  5  6  7  8
+//  9 10 11 12
+// 13 14 15 16
+func successors(n int) []int {
+	switch n {
+	case 1:
+		return []int{2, 5, 6}      // conexiones: derecha, abajo, diagonal
+	case 2:
+		return []int{1, 3, 5, 6, 7}
+	case 3:
+		return []int{2, 4, 6, 7, 8}
+	case 4:
+		return []int{3, 7, 8}
+	case 5:
+		return []int{1, 2, 6, 9, 10}
+	case 6:
+		return []int{1, 2, 3, 5, 7, 9, 10, 11}
+	case 7:
+		return []int{2, 3, 4, 6, 8, 10, 11, 12}
+	case 8:
+		return []int{3, 4, 7, 11, 12}
+	case 9:
+		return []int{5, 6, 10, 13, 14}
+	case 10:
+		return []int{5, 6, 7, 9, 11, 13, 14, 15}
+	case 11:
+		return []int{6, 7, 8, 10, 12, 14, 15, 16}
+	case 12:
+		return []int{7, 8, 11, 15, 16}
+	case 13:
+		return []int{9, 10, 14}
+	case 14:
+		return []int{9, 10, 11, 13, 15}
+	case 15:
+		return []int{10, 11, 12, 14, 16}
+	case 16:
+		return []int{11, 12, 15}
+	default:
+		return nil
+	}
+}
+
+// depthFirstSearch algorithm to find a path from the begin node to the end node.
+func depthFirstSearch(begin, end int) {
+	fmt.Printf("Iniciando búsqueda en profundidad desde nodo %d hasta nodo %d\n", begin, end)
+	fmt.Println("Matriz 4x4:")
+	fmt.Println(" 1  2  3  4")
+	fmt.Println(" 5  6  7  8")
+	fmt.Println(" 9 10 11 12")
+	fmt.Println("13 14 15 16")
+	fmt.Println()
+	
+	list := []int{begin}
+	visited := make(map[int]bool)  // Para evitar ciclos infinitos
+	step := 1
+
+	for len(list) > 0 {
+		// Tomar el primer elemento de la lista (simulando pila LIFO)
+		current := list[0]
+		list = list[1:]
+
+		fmt.Printf("Paso %d: Explorando nodo %d\n", step, current)
+		
+		// Si ya visitamos este nodo, saltar
+		if visited[current] {
+			fmt.Printf("  → Nodo %d ya visitado, saltando...\n\n", current)
+			step++
+			continue
+		}
+		
+		// Marcar como visitado
+		visited[current] = true
+
+		// Verificar si encontramos la solución
+		if current == end {
+			fmt.Printf("  → ¡SOLUCIÓN ENCONTRADA!\n")
+			fmt.Printf("  → Nodo objetivo %d alcanzado\n", end)
+			return
+		}
+
+		// Obtener sucesores del nodo actual
+		tmp := successors(current)
+		if tmp != nil {
+			// Filtrar sucesores ya visitados
+			unvisited := []int{}
+			for _, node := range tmp {
+				if !visited[node] {
+					unvisited = append(unvisited, node)
+				}
+			}
+			
+			fmt.Printf("  → Sucesores de %d: %v\n", current, tmp)
+			fmt.Printf("  → Sucesores no visitados: %v\n", unvisited)
+			
+			if len(unvisited) > 0 {
+				// Invertir para mantener orden de profundidad
+				reverse(unvisited)
+				// Agregar al inicio de la lista (comportamiento de pila)
+				unvisited = append(unvisited, list...)
+				list = unvisited
+				fmt.Printf("  → Lista actualizada: %v\n", list)
+			} else {
+				fmt.Printf("  → No hay sucesores nuevos para explorar\n")
+			}
+		} else {
+			fmt.Printf("  → No hay sucesores para el nodo %d\n", current)
+		}
+		
+		fmt.Println()
+		step++
+	}
+	
+	fmt.Println("NO SE ENCONTRÓ SOLUCIÓN")
+}
+
+// reverse function to reverse the order of elements in a slice.
+func reverse(s []int) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+}
+
+// Main function to execute the Depth-First Search algorithm.
+func main() {
+	fmt.Println("===============================================")
+	fmt.Println("    BÚSQUEDA EN PROFUNDIDAD - MATRIZ 4x4")
+	fmt.Println("===============================================")
+	fmt.Println()
+	
+	// Ejemplo 1: Buscar de 1 a 16 (esquina superior izquierda a inferior derecha)
+	depthFirstSearch(1, 16)
+	
+	fmt.Println("\n================================================")
+	fmt.Println()
+	
+	// Ejemplo 2: Buscar de 1 a 12
+	depthFirstSearch(1, 12)
+}
+
+SALIDA DE EJECUCIÓN:
+===================
+
+===============================================
+    BÚSQUEDA EN PROFUNDIDAD - MATRIZ 4x4
+===============================================
+
+Iniciando búsqueda en profundidad desde nodo 1 hasta nodo 16
+Matriz 4x4:
+ 1  2  3  4
+ 5  6  7  8
+ 9 10 11 12
+13 14 15 16
+
+Paso 1: Explorando nodo 1
+  → Sucesores de 1: [2 5 6]
+  → Sucesores no visitados: [2 5 6]
+  → Lista actualizada: [6 5 2]
+
+Paso 2: Explorando nodo 6
+  → Sucesores de 6: [1 2 3 5 7 9 10 11]
+  → Sucesores no visitados: [2 3 5 7 9 10 11]
+  → Lista actualizada: [11 10 9 7 5 3 2 5 2]
+
+Paso 3: Explorando nodo 11
+  → Sucesores de 11: [6 7 8 10 12 14 15 16]
+  → Sucesores no visitados: [7 8 10 12 14 15 16]
+  → Lista actualizada: [16 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 4: Explorando nodo 16
+  → ¡SOLUCIÓN ENCONTRADA!
+  → Nodo objetivo 16 alcanzado
+
+================================================
+
+Iniciando búsqueda en profundidad desde nodo 1 hasta nodo 12
+Matriz 4x4:
+ 1  2  3  4
+ 5  6  7  8
+ 9 10 11 12
+13 14 15 16
+
+Paso 1: Explorando nodo 1
+  → Sucesores de 1: [2 5 6]
+  → Sucesores no visitados: [2 5 6]
+  → Lista actualizada: [6 5 2]
+
+Paso 2: Explorando nodo 6
+  → Sucesores de 6: [1 2 3 5 7 9 10 11]
+  → Sucesores no visitados: [2 3 5 7 9 10 11]
+  → Lista actualizada: [11 10 9 7 5 3 2 5 2]
+
+Paso 3: Explorando nodo 11
+  → Sucesores de 11: [6 7 8 10 12 14 15 16]
+  → Sucesores no visitados: [7 8 10 12 14 15 16]
+  → Lista actualizada: [16 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 4: Explorando nodo 16
+  → Sucesores de 16: [11 12 15]
+  → Sucesores no visitados: [12 15]
+  → Lista actualizada: [15 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 5: Explorando nodo 15
+  → Sucesores de 15: [10 11 12 14 16]
+  → Sucesores no visitados: [10 12 14]
+  → Lista actualizada: [14 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 6: Explorando nodo 14
+  → Sucesores de 14: [9 10 11 13 15]
+  → Sucesores no visitados: [9 10 13]
+  → Lista actualizada: [13 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 7: Explorando nodo 13
+  → Sucesores de 13: [9 10 14]
+  → Sucesores no visitados: [9 10]
+  → Lista actualizada: [10 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 8: Explorando nodo 10
+  → Sucesores de 10: [5 6 7 9 11 13 14 15]
+  → Sucesores no visitados: [5 7 9]
+  → Lista actualizada: [9 7 5 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 9: Explorando nodo 9
+  → Sucesores de 9: [5 6 10 13 14]
+  → Sucesores no visitados: [5]
+  → Lista actualizada: [5 7 5 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 10: Explorando nodo 5
+  → Sucesores de 5: [1 2 6 9 10]
+  → Sucesores no visitados: [2]
+  → Lista actualizada: [2 7 5 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 11: Explorando nodo 2
+  → Sucesores de 2: [1 3 5 6 7]
+  → Sucesores no visitados: [3 7]
+  → Lista actualizada: [7 3 7 5 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 12: Explorando nodo 7
+  → Sucesores de 7: [2 3 4 6 8 10 11 12]
+  → Sucesores no visitados: [3 4 8 12]
+  → Lista actualizada: [12 8 4 3 3 7 5 9 10 9 12 10 12 15 14 12 10 8 7 10 9 7 5 3 2 5 2]
+
+Paso 13: Explorando nodo 12
+  → ¡SOLUCIÓN ENCONTRADA!
+  → Nodo objetivo 12 alcanzado
+
+ANÁLISIS DEL ALGORITMO:
+======================
+
+1. **Representación de la matriz 4x4**: 
+   - Cada posición tiene un número del 1 al 16
+   - Los nodos están conectados con sus vecinos adyacentes (incluye diagonales)
+
+2. **Funcionamiento del DFS**:
+   - Utiliza una estructura de pila (LIFO - Last In First Out)
+   - Explora tan profundo como sea posible antes de retroceder
+   - Evita ciclos usando un mapa de nodos visitados
+
+3. **Ventajas**:
+   - Encuentra soluciones rápidamente si existen en la rama explorada
+   - Uso de memoria relativamente bajo
+   - Implementación simple
+
+4. **Desventajas**:
+   - No garantiza encontrar la solución más corta
+   - Puede explorar ramas muy largas innecesariamente
+   - En grafos infinitos puede no terminar
+
+5. **Complejidad**:
+   - Tiempo: O(V + E) donde V = vértices, E = aristas
+   - Espacio: O(V) para el mapa de visitados y la pila

@@ -1,3 +1,13 @@
+BÚSQUEDA POR ANCHURA (BFS) - MATRIZ 4x4
+========================================
+
+ALGORITMO: Breadth-First Search (BFS)
+REPRESENTACIÓN: Matriz 4x4 con nodos 1-16
+CONECTIVIDAD: Cada nodo conectado a nodos adyacentes (horizontal, vertical y diagonal)
+
+CÓDIGO FUENTE COMPLETO:
+======================
+
 package main
 
 import (
@@ -7,16 +17,14 @@ import (
 
 // returns the successors of a given node in a 4x4 matrix graph.
 // Matrix representation:
-//
-//	1  2  3  4
-//	5  6  7  8
-//	9 10 11 12
-//
+//  1  2  3  4
+//  5  6  7  8
+//  9 10 11 12
 // 13 14 15 16
 func successors(n int) []int {
 	switch n {
 	case 1:
-		return []int{2, 5, 6} // conexiones: derecha, abajo, diagonal
+		return []int{2, 5, 6}      // conexiones: derecha, abajo, diagonal
 	case 2:
 		return []int{1, 3, 5, 6, 7}
 	case 3:
@@ -61,9 +69,9 @@ func breadthFirstSearch(begin, end int) {
 	fmt.Println(" 9 10 11 12")
 	fmt.Println("13 14 15 16")
 	fmt.Println()
-
-	queue := []int{begin}         // Cola para BFS (FIFO - First In First Out)
-	visited := make(map[int]bool) // Para evitar ciclos infinitos
+	
+	queue := []int{begin}      // Cola para BFS (FIFO - First In First Out)
+	visited := make(map[int]bool)  // Para evitar ciclos infinitos
 	step := 1
 
 	for len(queue) > 0 {
@@ -72,14 +80,14 @@ func breadthFirstSearch(begin, end int) {
 		queue = queue[1:]
 
 		fmt.Printf("Paso %d: Explorando nodo %d\n", step, current)
-
+		
 		// Si ya visitamos este nodo, saltar
 		if visited[current] {
 			fmt.Printf("  → Nodo %d ya visitado, saltando...\n\n", current)
 			step++
 			continue
 		}
-
+		
 		// Marcar como visitado
 		visited[current] = true
 
@@ -100,10 +108,10 @@ func breadthFirstSearch(begin, end int) {
 					unvisited = append(unvisited, node)
 				}
 			}
-
+			
 			fmt.Printf("  → Sucesores de %d: %v\n", current, tmp)
 			fmt.Printf("  → Sucesores no visitados: %v\n", unvisited)
-
+			
 			if len(unvisited) > 0 {
 				// Agregar al final de la cola (comportamiento FIFO de BFS)
 				queue = append(queue, unvisited...)
@@ -114,11 +122,11 @@ func breadthFirstSearch(begin, end int) {
 		} else {
 			fmt.Printf("  → No hay sucesores para el nodo %d\n", current)
 		}
-
+		
 		fmt.Println()
 		step++
 	}
-
+	
 	fmt.Println("NO SE ENCONTRÓ SOLUCIÓN")
 }
 
@@ -127,16 +135,97 @@ func main() {
 	fmt.Println("BÚSQUEDA POR ANCHURA (BFS) - MATRIZ 4x4")
 	fmt.Println("=====================================")
 	fmt.Println()
-
+	
 	// Ejemplo 1: Buscar desde nodo 1 hasta nodo 16
 	fmt.Println("EJEMPLO 1: Búsqueda desde nodo 1 hasta nodo 16")
 	fmt.Println("-----------------------------------------------")
 	breadthFirstSearch(1, 16)
-
+	
 	fmt.Println("\n" + strings.Repeat("=", 60) + "\n")
-
+	
 	// Ejemplo 2: Buscar desde nodo 1 hasta nodo 12
 	fmt.Println("EJEMPLO 2: Búsqueda desde nodo 1 hasta nodo 12")
 	fmt.Println("-----------------------------------------------")
 	breadthFirstSearch(1, 12)
 }
+
+RESULTADOS DE EJECUCIÓN:
+=======================
+
+BÚSQUEDA POR ANCHURA (BFS) - MATRIZ 4x4
+=====================================
+
+EJEMPLO 1: Búsqueda desde nodo 1 hasta nodo 16
+-----------------------------------------------
+Iniciando búsqueda por anchura desde nodo 1 hasta nodo 16
+Matriz 4x4:
+ 1  2  3  4
+ 5  6  7  8
+ 9 10 11 12
+13 14 15 16
+
+Paso 1: Explorando nodo 1
+  → Sucesores de 1: [2 5 6]
+  → Sucesores no visitados: [2 5 6]
+  → Cola actualizada: [2 5 6]
+
+Paso 2: Explorando nodo 2
+  → Sucesores de 2: [1 3 5 6 7]
+  → Sucesores no visitados: [3 5 6 7]
+  → Cola actualizada: [5 6 3 5 6 7]
+
+[... continúa la búsqueda por anchura ...]
+
+Paso 36: Explorando nodo 16
+  → ¡SOLUCIÓN ENCONTRADA!
+  → Nodo objetivo 16 alcanzado
+
+============================================================
+
+EJEMPLO 2: Búsqueda desde nodo 1 hasta nodo 12
+-----------------------------------------------
+Iniciando búsqueda por anchura desde nodo 1 hasta nodo 12
+Matriz 4x4:
+ 1  2  3  4
+ 5  6  7  8
+ 9 10 11 12
+13 14 15 16
+
+[... búsqueda por anchura ...]
+
+Paso 24: Explorando nodo 12
+  → ¡SOLUCIÓN ENCONTRADA!
+  → Nodo objetivo 12 alcanzado
+
+ANÁLISIS DEL ALGORITMO:
+=====================
+
+CARACTERÍSTICAS DEL BFS:
+- Utiliza una cola (FIFO - First In First Out)
+- Explora todos los nodos a la misma distancia antes de pasar al siguiente nivel
+- Garantiza encontrar el camino más corto en términos de número de aristas
+- Utiliza un mapa para evitar revisitar nodos ya explorados
+
+DIFERENCIAS CON DFS:
+- BFS explora por niveles, DFS explora en profundidad
+- BFS usa cola, DFS usa pila (o recursión)
+- BFS encuentra el camino más corto, DFS encuentra cualquier camino
+
+RESULTADOS:
+- Búsqueda 1→16: Encontrada en 36 pasos
+- Búsqueda 1→12: Encontrada en 24 pasos
+- El algoritmo muestra el comportamiento correcto de exploración por niveles
+
+MATRIZ DE CONECTIVIDAD 4x4:
+===========================
+ 1  2  3  4
+ 5  6  7  8
+ 9 10 11 12
+13 14 15 16
+
+Cada nodo está conectado con sus vecinos inmediatos:
+- Horizontal (izquierda/derecha)
+- Vertical (arriba/abajo)  
+- Diagonal (esquinas adyacentes)
+
+Por ejemplo, el nodo 6 está conectado con: 1, 2, 3, 5, 7, 9, 10, 11
