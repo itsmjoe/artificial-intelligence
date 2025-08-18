@@ -160,5 +160,8 @@ func stringalign(ainstr, binstr string, mispen, gappen, skwpen float64) {
 }
 
 func main() {
+	fmt.Println("--- Needleman-Wunsch ---")
 	stringalign("ATCGTACGTA", "ATGGTCGTA", 1.0, 1.0, 1.0)
+	fmt.Println("--- A* (same params) ---")
+	astarAlign("ATCGTACGTA", "ATGGTCGTA", 1.0, 1.0, 1.0)
 }
