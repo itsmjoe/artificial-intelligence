@@ -1,0 +1,36 @@
+Entrando en nodo 1 depth=3 maximizing=true alpha=-999 beta=999
+Entrando en nodo 2 depth=2 maximizing=false alpha=-999 beta=999
+Entrando en nodo 4 depth=1 maximizing=true alpha=-999 beta=999
+Nodo 4 -> hijo 6 heur=13 (mejor=13)
+  Actualizado alpha=13
+Nodo 4 -> hijo 7 heur=8 (mejor=13)
+Nodo 2 -> hijo 4 heur=13 (mejor=13)
+  Actualizado beta=13
+Entrando en nodo 5 depth=1 maximizing=true alpha=-999 beta=13
+Nodo 5 -> hijo 8 heur=-6 (mejor=-6)
+  Actualizado alpha=-6
+Nodo 5 -> hijo 9 heur=1 (mejor=1)
+  Actualizado alpha=1
+Nodo 2 -> hijo 5 heur=1 (mejor=1)
+  Actualizado beta=1
+Nodo 1 -> hijo 2 heur=1 (mejor=1)
+  Actualizado alpha=1
+Entrando en nodo 3 depth=2 maximizing=false alpha=1 beta=999
+Entrando en nodo 10 depth=1 maximizing=true alpha=1 beta=999
+Nodo 10 -> hijo 12 heur=12 (mejor=12)
+  Actualizado alpha=12
+Nodo 10 -> hijo 13 heur=12 (mejor=12)
+Nodo 3 -> hijo 10 heur=12 (mejor=12)
+  Actualizado beta=12
+Entrando en nodo 11 depth=1 maximizing=true alpha=1 beta=12
+Nodo 11 -> hijo 14 heur=2 (mejor=2)
+  Actualizado alpha=2
+Nodo 11 -> hijo 15 heur=3 (mejor=3)
+  Actualizado alpha=3
+Nodo 3 -> hijo 11 heur=3 (mejor=3)
+  Actualizado beta=3
+Nodo 1 -> hijo 3 heur=3 (mejor=3)
+  Actualizado alpha=3
+Resultado final: {1 3}
+DOT guardado en: tree.dot
+Imagen de grafico generada en: tree.png

@@ -1,0 +1,36 @@
+Entrando en nodo 1 depth=3 maximizing=true alpha=-999 beta=999 path=[1]
+Entrando en nodo 2 depth=2 maximizing=false alpha=-999 beta=999 path=[1 2]
+Entrando en nodo 4 depth=1 maximizing=true alpha=-999 beta=999 path=[1 2 4]
+Nodo 4 -> hijo 6 heur=-7 (mejor=-7)
+  Actualizado alpha=-7
+Nodo 4 -> hijo 7 heur=-5 (mejor=-5)
+  Actualizado alpha=-5
+Nodo 2 -> hijo 4 heur=-5 (mejor=-5)
+  Actualizado beta=-5
+Entrando en nodo 5 depth=1 maximizing=true alpha=-999 beta=-5 path=[1 2 5]
+Nodo 5 -> hijo 8 heur=7 (mejor=7)
+  Actualizado alpha=7
+Poda alfa-beta: nodo padre=5, se poda la rama hija 9, ruta=[1 2 5 9] (desde índice 1)
+Nodo 2 -> hijo 5 heur=7 (mejor=-5)
+Nodo 1 -> hijo 2 heur=-5 (mejor=-5)
+  Actualizado alpha=-5
+Entrando en nodo 3 depth=2 maximizing=false alpha=-5 beta=999 path=[1 3]
+Entrando en nodo 10 depth=1 maximizing=true alpha=-5 beta=999 path=[1 3 10]
+Nodo 10 -> hijo 12 heur=0 (mejor=0)
+  Actualizado alpha=0
+Nodo 10 -> hijo 13 heur=15 (mejor=15)
+  Actualizado alpha=15
+Nodo 3 -> hijo 10 heur=15 (mejor=15)
+  Actualizado beta=15
+Entrando en nodo 11 depth=1 maximizing=true alpha=-5 beta=15 path=[1 3 11]
+Nodo 11 -> hijo 14 heur=4 (mejor=4)
+  Actualizado alpha=4
+Nodo 11 -> hijo 15 heur=9 (mejor=9)
+  Actualizado alpha=9
+Nodo 3 -> hijo 11 heur=9 (mejor=9)
+  Actualizado beta=9
+Nodo 1 -> hijo 3 heur=9 (mejor=9)
+  Actualizado alpha=9
+Resultado final: {1 9}
+DOT guardado en: tree.dot
+Imagen de grafico generada en: tree.png
